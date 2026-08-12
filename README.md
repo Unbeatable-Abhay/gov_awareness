@@ -43,10 +43,22 @@ Browse all available central and state government schemes in one place. Select a
 
 ```
 sarkarly/
-├── main.py           # Flask backend with API routes
-├── .env.example      # Environment variable template
-├── .gitignore
-└── requirements.txt  # Python dependencies
+├── main.py                  # Entry point: builds the app via the factory and runs it
+├── Procfile                 # Production process command (gunicorn) for Render/Heroku
+├── backend/
+│   ├── __init__.py          # App factory: wires up config, CORS, logging, routes, error handlers
+│   ├── config.py            # All environment-driven configuration in one place
+│   ├── logging_config.py    # Structured logging setup
+│   ├── routes.py            # Flask blueprint: /scheme_match, /legal_advisory, /scheme_directory
+│   ├── agents.py            # Agent construction + the multi-model fallback request handler
+│   ├── llm_providers.py     # Builds the Groq -> Gemini -> Cerebras fallback chain
+│   ├── search_tools.py      # Tavily web search tool wrapper
+│   ├── schemas.py           # Pydantic response schemas (structured LLM output)
+│   ├── prompts.py           # System prompts for each agent
+│   └── errors.py            # JSON error handlers (400/404/405/500)
+├── frontend/                 # React app (see frontend/README.md)
+├── .env.example              # Backend environment variable template
+└── requirements.txt          # Python dependencies
 ```
 
 ---
@@ -55,8 +67,8 @@ sarkarly/
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/Unbeatable-Abhay/gov_awareness.git
-cd gov_awareness
+git clone https://github.com/Unbeatable-Abhay/sarkarly.git
+cd sarkarly
 ```
 
 **2. Install dependencies**
@@ -66,23 +78,39 @@ pip install -r requirements.txt
 
 **3. Set up environment variables**
 
-Copy `.env.example` to `.env` and fill in your API keys:
+Copy `.env.example` to `.env` and fill in your API keys (see it for the full list, including server/CORS settings):
 ```
 GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
 CEREBRAS_API_KEY=your_cerebras_api_key
 TAVILY_API_KEY=your_tavily_api_key
 ```
 
 - Get Groq API key: https://console.groq.com
+- Get Gemini API key: https://aistudio.google.com/apikey
 - Get Cerebras API key: https://cloud.cerebras.ai
 - Get Tavily API key: https://app.tavily.com
 
-**4. Run the backend**
+**4. Run the backend (development)**
 ```bash
 python main.py
 ```
 
-The server will start at `http://localhost:5000`
+The server starts at `http://localhost:8000` by default (configurable via `PORT`).
+
+**5. Run the backend (production)**
+```bash
+gunicorn main:app
+```
+This is what the included `Procfile` runs on Render/Heroku-style hosts. Always set `ALLOWED_ORIGINS` to your real frontend domain(s) in production — it defaults to `*` (open) for local dev convenience only.
+
+**6. Run the frontend**
+```bash
+cd frontend
+cp .env.example .env   # point REACT_APP_API_URL at your backend
+npm install
+npm start
+```
 
 ---
 
