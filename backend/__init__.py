@@ -29,7 +29,7 @@ def create_app() -> Flask:
 
     if not Config.has_any_llm_key():
         logger.warning(
-            "No LLM provider API key found (GROQ_API_KEY / GEMINI_API_KEY / CEREBRAS_API_KEY). "
+            "No LLM provider API key found (GROQ_API_KEY / MISTRAL_API_KEY). "
             "AI-backed routes will return 503 until at least one is configured."
         )
 

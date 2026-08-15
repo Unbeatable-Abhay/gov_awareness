@@ -30,11 +30,9 @@ class Config:
 
     # --- API keys (existence is checked, values are read lazily where used) ---
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-    CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
     @classmethod
     def has_any_llm_key(cls) -> bool:
-        return bool(cls.GROQ_API_KEY or cls.CEREBRAS_API_KEY or cls.GEMINI_API_KEY)
+        return bool(cls.GROQ_API_KEY or cls.MISTRAL_API_KEY)

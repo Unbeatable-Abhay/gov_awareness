@@ -72,7 +72,7 @@ def handle_request(agent_type: str, user_query: str):
 
     if not llms:
         return (
-            {"error": "No AI models configured. Please set GROQ_API_KEY, GEMINI_API_KEY, or CEREBRAS_API_KEY."},
+            {"error": "No AI models configured. Please set GROQ_API_KEY or MISTRAL_API_KEY."},
             503,
         )
 

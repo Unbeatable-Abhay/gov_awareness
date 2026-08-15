@@ -35,8 +35,7 @@ Browse all available central and state government schemes in one place. Select a
 | Backend | Flask (Python) |
 | AI Agent | LangChain |
 | Web Search | Tavily API |
-| Language Model | LLaMA 3.3 70B via Groq (primary) with Cerebras fallback |
-
+| Language Model | LLaMA 3.3 70B via Groq (primary) with Mistral Large fallback |
 ---
 
 ## Project Structure
@@ -51,7 +50,7 @@ sarkarly/
 │   ├── logging_config.py    # Structured logging setup
 │   ├── routes.py            # Flask blueprint: /scheme_match, /legal_advisory, /scheme_directory
 │   ├── agents.py            # Agent construction + the multi-model fallback request handler
-│   ├── llm_providers.py     # Builds the Groq -> Gemini -> Cerebras fallback chain
+│   ├── llm_providers.py     # Builds the Groq -> Mistral fallback chain
 │   ├── search_tools.py      # Tavily web search tool wrapper
 │   ├── schemas.py           # Pydantic response schemas (structured LLM output)
 │   ├── prompts.py           # System prompts for each agent
@@ -81,14 +80,12 @@ pip install -r requirements.txt
 Copy `.env.example` to `.env` and fill in your API keys (see it for the full list, including server/CORS settings):
 ```
 GROQ_API_KEY=your_groq_api_key
-GEMINI_API_KEY=your_gemini_api_key
-CEREBRAS_API_KEY=your_cerebras_api_key
+Mistral_API_KEY=your_mistral_api_key
 TAVILY_API_KEY=your_tavily_api_key
 ```
 
 - Get Groq API key: https://console.groq.com
-- Get Gemini API key: https://aistudio.google.com/apikey
-- Get Cerebras API key: https://cloud.cerebras.ai
+- Get Mistral API key: https://console.mistral.ai
 - Get Tavily API key: https://app.tavily.com
 
 **4. Run the backend (development)**
@@ -126,7 +123,7 @@ npm start
 
 ## LLM Fallback
 
-The app uses **Groq** as the primary LLM provider. If Groq's daily token limit is reached, requests automatically fall back to **Cerebras** — both running LLaMA 3.3 70B. This ensures the app stays available even when one provider's free tier is exhausted.
+The app uses **Groq** as the primary LLM provider. If Groq's daily token limit is reached, requests automatically fall back to **Mistral Large**. This ensures the app stays available even when one provider's free tier is exhausted.
 
 ---
 
