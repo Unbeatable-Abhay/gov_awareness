@@ -12,9 +12,25 @@ Rules:
   benefits, and application steps rather than short fragments.
 - Include concrete numbers wherever you find them: exact amounts, subsidy
   percentages, loan limits, payout frequency (financial_benefits field).
-- Look for and include practical details beyond the basics: application
-  deadlines or windows, common reasons applications get rejected or delayed,
-  and an official helpline phone number or email if one exists.
+  Do not leave financial_benefits empty just because the number wasn't in
+  your first search result — search specifically for the scheme's benefit
+  amount if you haven't found it yet. Only leave it empty if, after
+  searching, you genuinely cannot find any financial detail because the
+  scheme has no direct monetary component.
+- Actively search for a helpline phone number or email for each scheme
+  (e.g. search "<scheme name> helpline number") rather than only using
+  whatever a general search happens to surface. Most central government
+  schemes publish a helpline — only leave helpline_contact empty after you
+  have specifically searched for one and found none.
+- rejection_reasons must be specific to THIS scheme's actual application
+  process and common failure points — not generic phrases like "incomplete
+  application" or "not meeting eligibility criteria" that could apply to
+  any scheme. Base them on real, scheme-specific issues you find in your
+  search (e.g. a particular document mismatch, a specific verification
+  step known to trip people up, a common misunderstanding about who
+  qualifies). If you cannot find scheme-specific rejection information,
+  it is better to leave the list shorter than to fill it with generic
+  filler that repeats across every scheme.
 - Do not guess links, deadlines, financial figures, or helpline numbers —
   only include something if you actually found it via search. Leave the
   field empty rather than inventing plausible-sounding information.
@@ -59,9 +75,25 @@ Rules:
   application steps rather than short fragments.
 - Include concrete numbers wherever you find them: exact amounts, subsidy
   percentages, loan limits, payout frequency (financial_benefits field).
-- Look for and include practical details beyond the basics: application
-  deadlines or windows, common reasons applications get rejected or delayed,
-  and an official helpline phone number or email if one exists.
+  Do not leave financial_benefits empty just because the number wasn't in
+  your first search result — search specifically for the scheme's benefit
+  amount if you haven't found it yet. Only leave it empty if, after
+  searching, you genuinely cannot find any financial detail because the
+  scheme has no direct monetary component.
+- Actively search for a helpline phone number or email for each scheme
+  (e.g. search "<scheme name> helpline number") rather than only using
+  whatever a general search happens to surface. Most central government
+  schemes publish a helpline — only leave helpline_contact empty after you
+  have specifically searched for one and found none.
+- rejection_reasons must be specific to THIS scheme's actual application
+  process and common failure points — not generic phrases like "incomplete
+  application" or "not meeting eligibility criteria" that could apply to
+  any scheme. Base them on real, scheme-specific issues you find in your
+  search (e.g. a particular document mismatch, a specific verification
+  step known to trip people up, a common misunderstanding about who
+  qualifies). If you cannot find scheme-specific rejection information,
+  it is better to leave the list shorter than to fill it with generic
+  filler that repeats across every scheme.
 - Do not guess links, deadlines, financial figures, or helpline numbers —
   only include something if you actually found it via search. Leave the
   field empty rather than inventing plausible-sounding information.

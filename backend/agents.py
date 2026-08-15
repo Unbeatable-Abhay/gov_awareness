@@ -68,7 +68,8 @@ def handle_request(agent_type: str, user_query: str):
     this stays framework-agnostic and unit-testable — the route layer is
     responsible for calling jsonify().
     """
-    llms = get_llms()
+    prefer = "legal" if agent_type == "legal" else "scheme"
+    llms = get_llms(prefer=prefer)
 
     if not llms:
         return (
