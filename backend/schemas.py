@@ -125,7 +125,15 @@ class LegalResponse(BaseModel):
             "concretely — what they can and cannot legally do in this scenario."
         ),
     )
-    sources: List[str] = Field(default_factory=list, description="Official/legal source links used")
+    sources: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Actual clickable URLs to the official/legal sources used (e.g. "
+            "'https://www.ugc.gov.in/...', not just the organization's name). "
+            "Only include a URL if you actually found and verified it via "
+            "search — never guess or construct a plausible-looking URL."
+        ),
+    )
     disclaimer: str = Field(
         default="This information is for awareness purposes only. This is not legal advice. Please consult a qualified lawyer before taking legal action."
     )
