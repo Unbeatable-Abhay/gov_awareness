@@ -1,4 +1,5 @@
 import logging
+from asyncio import timeout
 
 from .config import Config
 
@@ -17,7 +18,8 @@ def _build_groq():
         api_key=Config.GROQ_API_KEY,
         base_url="https://api.groq.com/openai/v1",
         max_retries=0,
-        max_tokens=5000,
+        max_tokens=8000,
+        timeout=30,
     )
 
 
@@ -34,6 +36,7 @@ def _build_mistral():
         base_url="https://api.mistral.ai/v1",
         max_retries=0,
         max_tokens=8000,
+        timeout=30,
     )
 
 
