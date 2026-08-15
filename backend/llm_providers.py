@@ -36,7 +36,7 @@ def _build_mistral():
         base_url="https://api.mistral.ai/v1",
         max_retries=0,
         max_tokens=8000,
-        timeout=30,
+        timeout=60,
     )
 
 
