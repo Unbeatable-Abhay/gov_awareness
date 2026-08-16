@@ -86,7 +86,7 @@ class SchemeItem(BaseModel):
 
 class SchemeResponse(BaseModel):
     schemes: List[SchemeItem] = Field(
-        description="Up to 5 of the most relevant schemes found, ranked by relevance to the query."
+        description="Up to 4 of the most relevant schemes found, ranked by relevance to the query."
     )
     disclaimer: str = Field(
         default="This information is for awareness purposes only. Please verify through official government portals before applying."
