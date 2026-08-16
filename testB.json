@@ -1,0 +1,157 @@
+﻿{
+    "disclaimer":  "This information is for awareness purposes only. Please verify through official government portals before applying.",
+    "schemes":  [
+                    {
+                        "application_link":  "",
+                        "benefits":  [
+                                         "The scheme provides loans between Rs 10 lakh and Rs 1 crore to women entrepreneurs.",
+                                         "The scheme provides training and mentorship to the entrepreneurs.",
+                                         "The scheme has a provision for a subsidy of 25% of the loan amount."
+                                     ],
+                        "category":  "Women Empowerment",
+                        "deadline":  "",
+                        "description":  "The Stand Up India Scheme was launched by the Government of India to promote entrepreneurship among women and scheduled castes and scheduled tribes. The scheme provides loans between Rs 10 lakh and Rs 1 crore to women entrepreneurs for setting up greenfield enterprises in the manufacturing, services, or trading sectors. The scheme also provides training and mentorship to the entrepreneurs. The Stand Up India Scheme was launched in 2016 and is being implemented by the Small Industries Development Bank of India (SIDBI). The scheme has a provision for a subsidy of 25% of the loan amount, which is given to the entrepreneurs after they have made timely repayments for a certain period. The scheme also has a provision for a guarantee fee, which is 0.25% of the loan amount per annum.",
+                        "documents_required":  [
+                                                   "Aadhaar card",
+                                                   "PAN card",
+                                                   "Business plan",
+                                                   "Loan application form"
+                                               ],
+                        "eligibility":  [
+                                            "The applicant should be a woman entrepreneur.",
+                                            "The applicant should be between 18 and 45 years old.",
+                                            "The applicant should have a good credit score."
+                                        ],
+                        "financial_benefits":  "The scheme provides loans between Rs 10 lakh and Rs 1 crore to women entrepreneurs. The scheme has a provision for a subsidy of 25% of the loan amount, which is given to the entrepreneurs after they have made timely repayments for a certain period.",
+                        "helpline_contact":  "1800 180 1111",
+                        "how_to_apply":  {
+                                             "mode":  "online",
+                                             "steps":  [
+                                                           "Visit the official website of the Stand Up India Scheme.",
+                                                           "Fill in the online application form.",
+                                                           "Upload the required documents.",
+                                                           "Submit the application form."
+                                                       ]
+                                         },
+                        "ministry":  "Ministry of Finance",
+                        "official_link":  "https://www.standupmitra.in/",
+                        "rejection_reasons":  [
+                                                  "The applicant is not a woman entrepreneur.",
+                                                  "The applicant is not between 18 and 45 years old.",
+                                                  "The applicant has a bad credit score."
+                                              ],
+                        "scheme_name":  "Stand Up India Scheme"
+                    },
+                    {
+                        "application_link":  "",
+                        "benefits":  [
+                                         "The platform provides a platform for women entrepreneurs to connect with each other and with other stakeholders in the ecosystem.",
+                                         "The platform provides training, mentorship, and access to finance for women entrepreneurs."
+                                     ],
+                        "category":  "Women Empowerment",
+                        "deadline":  "",
+                        "description":  "The Women Entrepreneurship Platform (WEP) is an initiative of the NITI Aayog to promote entrepreneurship among women. The platform provides a platform for women entrepreneurs to connect with each other and with other stakeholders in the ecosystem. The WEP also provides training, mentorship, and access to finance for women entrepreneurs. The WEP was launched in 2018 and is being implemented by the NITI Aayog.",
+                        "documents_required":  [
+                                                   "Aadhaar card",
+                                                   "PAN card",
+                                                   "Business plan"
+                                               ],
+                        "eligibility":  [
+                                            "The applicant should be a woman entrepreneur.",
+                                            "The applicant should have a good credit score."
+                                        ],
+                        "financial_benefits":  "The platform provides access to finance for women entrepreneurs.",
+                        "helpline_contact":  "1800 111 110",
+                        "how_to_apply":  {
+                                             "mode":  "online",
+                                             "steps":  [
+                                                           "Visit the official website of the WEP.",
+                                                           "Fill in the online registration form.",
+                                                           "Upload the required documents.",
+                                                           "Submit the registration form."
+                                                       ]
+                                         },
+                        "ministry":  "NITI Aayog",
+                        "official_link":  "https://www.wep.gov.in/",
+                        "rejection_reasons":  [
+                                                  "The applicant is not a woman entrepreneur.",
+                                                  "The applicant has a bad credit score."
+                                              ],
+                        "scheme_name":  "Women Entrepreneurship Platform (WEP)"
+                    },
+                    {
+                        "application_link":  "",
+                        "benefits":  [
+                                         "The portal provides information and support to women entrepreneurs, including training, mentorship, and access to finance.",
+                                         "The portal provides a platform for women entrepreneurs to connect with each other and with other stakeholders in the ecosystem."
+                                     ],
+                        "category":  "Women Empowerment",
+                        "deadline":  "",
+                        "description":  "The Udyam Sakhi Portal is an initiative of the Ministry of Micro, Small and Medium Enterprises (MSME) to promote entrepreneurship among women. The portal provides information and support to women entrepreneurs, including training, mentorship, and access to finance. The portal also provides a platform for women entrepreneurs to connect with each other and with other stakeholders in the ecosystem. The Udyam Sakhi Portal was launched in 2018 and is being implemented by the Ministry of MSME.",
+                        "documents_required":  [
+                                                   "Aadhaar card",
+                                                   "PAN card",
+                                                   "Business plan"
+                                               ],
+                        "eligibility":  [
+                                            "The applicant should be a woman entrepreneur.",
+                                            "The applicant should have a good credit score."
+                                        ],
+                        "financial_benefits":  "The portal provides access to finance for women entrepreneurs.",
+                        "helpline_contact":  "1800 180 6763",
+                        "how_to_apply":  {
+                                             "mode":  "online",
+                                             "steps":  [
+                                                           "Visit the official website of the Udyam Sakhi Portal.",
+                                                           "Fill in the online registration form.",
+                                                           "Upload the required documents.",
+                                                           "Submit the registration form."
+                                                       ]
+                                         },
+                        "ministry":  "Ministry of Micro, Small and Medium Enterprises",
+                        "official_link":  "https://www.udysakhi.org/",
+                        "rejection_reasons":  [
+                                                  "The applicant is not a woman entrepreneur.",
+                                                  "The applicant has a bad credit score."
+                                              ],
+                        "scheme_name":  "Udyam Sakhi Portal"
+                    },
+                    {
+                        "application_link":  "",
+                        "benefits":  [
+                                         "The platform provides a platform for women entrepreneurs to sell their products and services online.",
+                                         "The platform provides access to finance for women entrepreneurs."
+                                     ],
+                        "category":  "Women Empowerment",
+                        "deadline":  "",
+                        "description":  "The Mahila E-Haat is an online platform launched by the Ministry of Women and Child Development to promote entrepreneurship among women. The platform provides a platform for women entrepreneurs to sell their products and services online. The Mahila E-Haat was launched in 2016 and is being implemented by the Ministry of Women and Child Development.",
+                        "documents_required":  [
+                                                   "Aadhaar card",
+                                                   "PAN card",
+                                                   "Business plan"
+                                               ],
+                        "eligibility":  [
+                                            "The applicant should be a woman entrepreneur.",
+                                            "The applicant should have a good credit score."
+                                        ],
+                        "financial_benefits":  "The platform provides access to finance for women entrepreneurs.",
+                        "helpline_contact":  "1800 111 110",
+                        "how_to_apply":  {
+                                             "mode":  "online",
+                                             "steps":  [
+                                                           "Visit the official website of the Mahila E-Haat.",
+                                                           "Fill in the online registration form.",
+                                                           "Upload the required documents.",
+                                                           "Submit the registration form."
+                                                       ]
+                                         },
+                        "ministry":  "Ministry of Women and Child Development",
+                        "official_link":  "https://www.mahilae-haat.com/",
+                        "rejection_reasons":  [
+                                                  "The applicant is not a woman entrepreneur.",
+                                                  "The applicant has a bad credit score."
+                                              ],
+                        "scheme_name":  "Mahila E-Haat"
+                    }
+                ]
+}

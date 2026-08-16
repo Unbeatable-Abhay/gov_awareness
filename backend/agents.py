@@ -1,5 +1,6 @@
 import logging
 
+from .database import save_scheme, search_cached_schemes
 from .llm_providers import get_llms
 from .prompts import DIRECTORY_SYSTEM_PROMPT, LEGAL_SYSTEM_PROMPT, SCHEME_SYSTEM_PROMPT
 from .schemas import LegalResponse, SchemeResponse
@@ -60,14 +61,23 @@ def _model_name(llm) -> str:
     return getattr(llm, "model_name", getattr(llm, "model", "unknown"))
 
 
-def handle_request(agent_type: str, user_query: str):
-    """Run the query through each configured LLM in order until one returns
-    a valid structured response.
+def _build_user_message(agent_type: str, user_query: str, exclude_names: list) -> str:
+    """Adds exclude context to the query sent to the agent, only when relevant."""
+    if agent_type != "directory" or not exclude_names:
+        return user_query
 
-    Returns a (payload, status_code) tuple rather than a Flask response, so
-    this stays framework-agnostic and unit-testable — the route layer is
-    responsible for calling jsonify().
-    """
+    excluded_list = ", ".join(exclude_names)
+    return (
+        f"{user_query}\n\n"
+        f"The user has already been shown these schemes — find DIFFERENT, "
+        f"additional relevant schemes, not these: {excluded_list}"
+    )
+
+
+def _run_live_agent(agent_type: str, user_query: str, exclude_names: list = None):
+    """The original live agent+search flow — unchanged behavior, just
+    extracted so handle_request can call it either directly (legal) or
+    after a cache miss (scheme/directory)."""
     prefer = "legal" if agent_type == "legal" else "scheme"
     llms = get_llms(prefer=prefer)
 
@@ -79,6 +89,8 @@ def handle_request(agent_type: str, user_query: str):
 
     web_search = make_web_search_tool()
     tools = [web_search]
+
+    message_content = _build_user_message(agent_type, user_query, exclude_names or [])
 
     for llm in llms:
         model_name = _model_name(llm)
@@ -94,7 +106,7 @@ def handle_request(agent_type: str, user_query: str):
 
             response = agent.invoke({
                 "messages": [
-                    {"role": "user", "content": user_query}
+                    {"role": "user", "content": message_content}
                 ]
             })
 
@@ -113,3 +125,35 @@ def handle_request(agent_type: str, user_query: str):
             continue
 
     return {"error": "All AI models are currently unavailable."}, 503
+
+
+def handle_request(agent_type: str, user_query: str, exclude_names: list = None):
+    """Run the query through the DB cache first (for scheme/directory
+    requests), falling back to the live agent+search chain on a cache miss
+    or for legal_advisory (which is never cached — see AGENTS.md).
+
+    exclude_names: scheme names already shown to the user, used by the
+    directory endpoint's "load more" feature to avoid repeating results.
+
+    Returns a (payload, status_code) tuple rather than a Flask response, so
+    this stays framework-agnostic and unit-testable — the route layer is
+    responsible for calling jsonify().
+    """
+    exclude_names = exclude_names or []
+
+    if agent_type in ("scheme", "directory"):
+        cached = search_cached_schemes(user_query, exclude_names=exclude_names)
+        if cached:
+            logger.info("Serving %d scheme(s) from cache for query: %r", len(cached), user_query)
+            return {
+                "schemes": cached,
+                "disclaimer": "This information is for awareness purposes only. Please verify through official government portals before applying.",
+            }, 200
+
+    data, status = _run_live_agent(agent_type, user_query, exclude_names=exclude_names)
+
+    if status == 200 and agent_type in ("scheme", "directory") and "schemes" in data:
+        for scheme in data["schemes"]:
+            save_scheme(scheme)
+
+    return data, status

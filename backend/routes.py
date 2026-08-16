@@ -60,5 +60,11 @@ def scheme_directory():
     if error_response:
         return error_response
 
-    data, status = handle_request("directory", user_query)
+    body = request.get_json(silent=True) or {}
+    exclude_names = body.get("exclude")
+
+    if exclude_names is not None and not isinstance(exclude_names, list):
+        return jsonify({"error": "'exclude' must be a list of scheme names."}), 400
+
+    data, status = handle_request("directory", user_query, exclude_names=exclude_names)
     return jsonify(data), status
