@@ -1,9 +1,19 @@
 import logging
 
-from .database import save_scheme, search_cached_schemes
+from .database import (
+    get_cached_scheme_by_name,
+    save_scheme,
+    search_cached_schemes,
+    search_cached_schemes_light,
+)
 from .llm_providers import get_llms
-from .prompts import DIRECTORY_SYSTEM_PROMPT, LEGAL_SYSTEM_PROMPT, SCHEME_SYSTEM_PROMPT
-from .schemas import LegalResponse, SchemeResponse
+from .prompts import (
+    DIRECTORY_SYSTEM_PROMPT,
+    LEGAL_SYSTEM_PROMPT,
+    SCHEME_LIST_SYSTEM_PROMPT,
+    SCHEME_SYSTEM_PROMPT,
+)
+from .schemas import LegalResponse, SchemeListResponse, SchemeResponse
 from .search_tools import make_web_search_tool
 
 logger = logging.getLogger(__name__)
@@ -33,7 +43,14 @@ def make_agents(llm, tools):
         response_format=SchemeResponse,
     )
 
-    return agent_scheme, agent_legal, agent_directory
+    agent_scheme_list = create_agent(
+        llm,
+        tools=tools,
+        system_prompt=SCHEME_LIST_SYSTEM_PROMPT,
+        response_format=SchemeListResponse,
+    )
+
+    return agent_scheme, agent_legal, agent_directory, agent_scheme_list
 
 
 def extract_structured_response(response):
@@ -63,7 +80,7 @@ def _model_name(llm) -> str:
 
 def _build_user_message(agent_type: str, user_query: str, exclude_names: list) -> str:
     """Adds exclude context to the query sent to the agent, only when relevant."""
-    if agent_type != "directory" or not exclude_names:
+    if agent_type not in ("directory", "list") or not exclude_names:
         return user_query
 
     excluded_list = ", ".join(exclude_names)
@@ -75,9 +92,10 @@ def _build_user_message(agent_type: str, user_query: str, exclude_names: list) -
 
 
 def _run_live_agent(agent_type: str, user_query: str, exclude_names: list = None):
-    """The original live agent+search flow — unchanged behavior, just
-    extracted so handle_request can call it either directly (legal) or
-    after a cache miss (scheme/directory)."""
+    """The live agent+search flow. agent_type is one of:
+    'scheme', 'legal', 'directory' (all full-detail, unchanged),
+    'list' (light preview, used by scheme_match/scheme_directory),
+    'details' (full-detail for exactly one named scheme)."""
     prefer = "legal" if agent_type == "legal" else "scheme"
     llms = get_llms(prefer=prefer)
 
@@ -95,14 +113,16 @@ def _run_live_agent(agent_type: str, user_query: str, exclude_names: list = None
     for llm in llms:
         model_name = _model_name(llm)
         try:
-            agent_scheme, agent_legal, agent_directory = make_agents(llm, tools)
+            agent_scheme, agent_legal, agent_directory, agent_scheme_list = make_agents(llm, tools)
 
-            if agent_type == "scheme":
+            if agent_type in ("scheme", "details"):
                 agent = agent_scheme
             elif agent_type == "legal":
                 agent = agent_legal
-            else:
+            elif agent_type == "directory":
                 agent = agent_directory
+            else:  # "list"
+                agent = agent_scheme_list
 
             response = agent.invoke({
                 "messages": [
@@ -128,18 +148,49 @@ def _run_live_agent(agent_type: str, user_query: str, exclude_names: list = None
 
 
 def handle_request(agent_type: str, user_query: str, exclude_names: list = None):
-    """Run the query through the DB cache first (for scheme/directory
-    requests), falling back to the live agent+search chain on a cache miss
-    or for legal_advisory (which is never cached — see AGENTS.md).
+    """Run the query through the DB cache first where applicable, falling
+    back to the live agent+search chain on a cache miss.
 
-    exclude_names: scheme names already shown to the user, used by the
-    directory endpoint's "load more" feature to avoid repeating results.
+    agent_type:
+      'scheme' / 'directory' — full-detail list requests (legacy path, still
+        used if the frontend calls the old endpoints directly)
+      'list' — light preview list (new default for scheme_match/scheme_directory)
+      'legal' — never cached, always live (see AGENTS.md)
+      'details' — full detail for exactly one named scheme
 
-    Returns a (payload, status_code) tuple rather than a Flask response, so
-    this stays framework-agnostic and unit-testable — the route layer is
-    responsible for calling jsonify().
+    exclude_names: scheme names already shown to the user, used by
+    "load more" to avoid repeating results.
+
+    Returns a (payload, status_code) tuple.
     """
     exclude_names = exclude_names or []
+
+    if agent_type == "list":
+        cached = search_cached_schemes_light(user_query, exclude_names=exclude_names)
+        if cached:
+            logger.info("Serving %d scheme(s) from cache (light) for query: %r", len(cached), user_query)
+            return {
+                "schemes": cached,
+                "disclaimer": "This information is for awareness purposes only. Please verify through official government portals before applying.",
+            }, 200
+
+        data, status = _run_live_agent("list", user_query, exclude_names=exclude_names)
+        # Deliberately NOT saved to cache — light results are incomplete
+        # records; only full-detail generations get cached (see save_scheme).
+        return data, status
+
+    if agent_type == "details":
+        cached_scheme = get_cached_scheme_by_name(user_query)
+        if cached_scheme:
+            logger.info("Serving scheme details from cache for: %r", user_query)
+            return cached_scheme, 200
+
+        data, status = _run_live_agent("details", user_query, exclude_names=None)
+        if status == 200 and "schemes" in data and data["schemes"]:
+            scheme = data["schemes"][0]
+            save_scheme(scheme)
+            return scheme, 200
+        return data, status
 
     if agent_type in ("scheme", "directory"):
         cached = search_cached_schemes(user_query, exclude_names=exclude_names)
@@ -150,10 +201,11 @@ def handle_request(agent_type: str, user_query: str, exclude_names: list = None)
                 "disclaimer": "This information is for awareness purposes only. Please verify through official government portals before applying.",
             }, 200
 
-    data, status = _run_live_agent(agent_type, user_query, exclude_names=exclude_names)
+        data, status = _run_live_agent(agent_type, user_query, exclude_names=exclude_names)
+        if status == 200 and "schemes" in data:
+            for scheme in data["schemes"]:
+                save_scheme(scheme)
+        return data, status
 
-    if status == 200 and agent_type in ("scheme", "directory") and "schemes" in data:
-        for scheme in data["schemes"]:
-            save_scheme(scheme)
-
-    return data, status
+    # "legal" — always live, never cached
+    return _run_live_agent(agent_type, user_query, exclude_names=None)

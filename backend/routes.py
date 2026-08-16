@@ -19,14 +19,18 @@ def _get_query_or_error():
     body = request.get_json(silent=True)
 
     if not isinstance(body, dict):
-        return None, (jsonify({"error": "Request body must be JSON with a 'query' field."}), 400)
+        return None, None, (jsonify({"error": "Request body must be JSON with a 'query' field."}), 400)
 
     user_query = body.get("query")
 
     if not isinstance(user_query, str) or not user_query.strip():
-        return None, (jsonify({"error": "Missing or empty 'query' field."}), 400)
+        return None, None, (jsonify({"error": "Missing or empty 'query' field."}), 400)
 
-    return user_query.strip(), None
+    exclude_names = body.get("exclude")
+    if exclude_names is not None and not isinstance(exclude_names, list):
+        return None, None, (jsonify({"error": "'exclude' must be a list of scheme names."}), 400)
+
+    return user_query.strip(), exclude_names, None
 
 
 @api_bp.route("/")
@@ -36,17 +40,17 @@ def home():
 
 @api_bp.route("/scheme_match", methods=["POST"])
 def scheme_match():
-    user_query, error_response = _get_query_or_error()
+    user_query, exclude_names, error_response = _get_query_or_error()
     if error_response:
         return error_response
 
-    data, status = handle_request("scheme", user_query)
+    data, status = handle_request("list", user_query, exclude_names=exclude_names)
     return jsonify(data), status
 
 
 @api_bp.route("/legal_advisory", methods=["POST"])
 def legal_advisory():
-    user_query, error_response = _get_query_or_error()
+    user_query, _exclude_names, error_response = _get_query_or_error()
     if error_response:
         return error_response
 
@@ -56,15 +60,19 @@ def legal_advisory():
 
 @api_bp.route("/scheme_directory", methods=["POST"])
 def scheme_directory():
-    user_query, error_response = _get_query_or_error()
+    user_query, exclude_names, error_response = _get_query_or_error()
     if error_response:
         return error_response
 
-    body = request.get_json(silent=True) or {}
-    exclude_names = body.get("exclude")
+    data, status = handle_request("list", user_query, exclude_names=exclude_names)
+    return jsonify(data), status
 
-    if exclude_names is not None and not isinstance(exclude_names, list):
-        return jsonify({"error": "'exclude' must be a list of scheme names."}), 400
 
-    data, status = handle_request("directory", user_query, exclude_names=exclude_names)
+@api_bp.route("/scheme_details", methods=["POST"])
+def scheme_details():
+    user_query, _exclude_names, error_response = _get_query_or_error()
+    if error_response:
+        return error_response
+
+    data, status = handle_request("details", user_query)
     return jsonify(data), status

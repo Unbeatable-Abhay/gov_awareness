@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 FRESHNESS_DAYS = 15
 SIMILARITY_THRESHOLD = 0.65
-MATCH_COUNT = 4
+MATCH_COUNT = 8  # used for list/browse searches
+LIGHT_FIELDS = ("scheme_name", "category", "ministry", "financial_benefits")
 
 _supabase_client = None
 _mistral_embed_client = None
@@ -64,17 +65,14 @@ def _scheme_search_text(scheme: dict) -> str:
     return f"{scheme.get('scheme_name', '')}. {scheme.get('category', '')}. {scheme.get('description', '')}"
 
 
-def search_cached_schemes(query: str, exclude_names: list = None):
-    """Embed the query and search the schemes table for fresh, relevant matches.
+def to_light_fields(scheme: dict) -> dict:
+    """Trim a full cached scheme record down to just the list-view fields."""
+    return {field: scheme.get(field, "") for field in LIGHT_FIELDS}
 
-    exclude_names: scheme names already shown to the user (e.g. from a
-    "load more" request) — these are filtered out of the results so the
-    same scheme isn't served twice.
 
-    Returns a list of scheme dicts (fresh matches only, stale ones and
-    excluded names removed) or an empty list if nothing usable is found —
-    never raises, so the caller can always safely fall back to the live agent.
-    """
+def _fetch_cached_matches(query: str, exclude_names: list, match_count: int):
+    """Shared logic: embed query, call match_schemes, filter stale/excluded.
+    Returns full (untrimmed) scheme dicts. Never raises."""
     client = get_supabase_client()
     if client is None:
         return []
@@ -86,9 +84,7 @@ def search_cached_schemes(query: str, exclude_names: list = None):
     exclude_names = exclude_names or []
 
     try:
-        # Fetch extra results so that after filtering out excluded names,
-        # we still have a good chance of hitting the real match_count.
-        fetch_count = MATCH_COUNT + len(exclude_names)
+        fetch_count = match_count + len(exclude_names)
         result = client.rpc(
             "match_schemes",
             {
@@ -120,19 +116,69 @@ def search_cached_schemes(query: str, exclude_names: list = None):
             row.pop("id", None)
             fresh_matches.append(row)
 
-        if len(fresh_matches) >= MATCH_COUNT:
+        if len(fresh_matches) >= match_count:
             break
 
     return fresh_matches
 
 
-def save_scheme(scheme: dict):
-    """Embed and upsert a single scheme into the cache.
+def search_cached_schemes(query: str, exclude_names: list = None):
+    """Full-record cache search, used by /scheme_details (single scheme
+    lookups) and anywhere the full 14-field record is actually needed."""
+    return _fetch_cached_matches(query, exclude_names, match_count=1)
 
-    Best-effort: failures are logged but never raised, since this runs
-    after we've already successfully returned a response to the user —
-    a cache-write failure shouldn't affect what they see.
-    """
+
+def search_cached_schemes_light(query: str, exclude_names: list = None):
+    """List-view cache search: finds fresh full records, then trims them
+    down to light fields before returning. Used by scheme_match/directory."""
+    full_matches = _fetch_cached_matches(query, exclude_names, match_count=MATCH_COUNT)
+    return [to_light_fields(scheme) for scheme in full_matches]
+
+
+def get_cached_scheme_by_name(scheme_name: str):
+    """Exact-name lookup for the detail endpoint — used after a light list
+    result is tapped, so we look for the specific scheme rather than doing
+    a fresh semantic search."""
+    client = get_supabase_client()
+    if client is None:
+        return None
+
+    try:
+        result = (
+            client.table("schemes")
+            .select("*")
+            .ilike("scheme_name", scheme_name.strip())
+            .limit(1)
+            .execute()
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Supabase exact-name lookup failed: %s", exc)
+        return None
+
+    rows = result.data or []
+    if not rows:
+        return None
+
+    row = rows[0]
+    freshness_cutoff = datetime.now(timezone.utc) - timedelta(days=FRESHNESS_DAYS)
+    updated_at = row.get("updated_at")
+    if updated_at:
+        updated_dt = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+        if updated_dt < freshness_cutoff:
+            return None  # treat as stale — caller should re-fetch live
+
+    row.pop("id", None)
+    row.pop("embedding", None)
+    row.pop("updated_at", None)
+    return row
+
+
+def save_scheme(scheme: dict):
+    """Embed and upsert a single FULL scheme record into the cache.
+
+    Only ever called with complete, full-detail scheme dicts — the light
+    list path never calls this, since partial records shouldn't be cached
+    as if they were complete."""
     client = get_supabase_client()
     if client is None:
         return

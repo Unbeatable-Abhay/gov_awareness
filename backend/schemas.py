@@ -137,3 +137,26 @@ class LegalResponse(BaseModel):
     disclaimer: str = Field(
         default="This information is for awareness purposes only. This is not legal advice. Please consult a qualified lawyer before taking legal action."
     )
+
+
+class SchemeListItem(BaseModel):
+    scheme_name: str
+    category: str = Field(description="e.g. Housing, Education, Health, Agriculture, Employment")
+    ministry: str = Field(description="Government ministry/department running the scheme")
+    financial_benefits: str = Field(
+        default="",
+        description=(
+            "A short one-line hook on the money involved — e.g. 'Up to Rs 6,000/year' "
+            "or 'Loan up to Rs 10 lakh, no collateral'. Keep it brief, this is a preview "
+            "for a list view, not the full detail."
+        ),
+    )
+
+
+class SchemeListResponse(BaseModel):
+    schemes: List[SchemeListItem] = Field(
+        description="Up to 8 of the most relevant schemes found, ranked by relevance to the query."
+    )
+    disclaimer: str = Field(
+        default="This information is for awareness purposes only. Please verify through official government portals before applying."
+    )
