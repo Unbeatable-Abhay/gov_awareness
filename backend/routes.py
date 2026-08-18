@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 api_bp = Blueprint("api", __name__)
 
+MAX_QUERY_LENGTH = 500
+
 
 def _user_id_key():
     """Rate-limit key for gated routes: the verified user's id (set by
@@ -38,11 +40,19 @@ def _get_query_or_error():
     if not isinstance(user_query, str) or not user_query.strip():
         return None, None, (jsonify({"error": "Missing or empty 'query' field."}), 400)
 
+    user_query = user_query.strip()
+
+    if len(user_query) > MAX_QUERY_LENGTH:
+        return None, None, (
+            jsonify({"error": f"Query is too long. Please keep it under {MAX_QUERY_LENGTH} characters."}),
+            400,
+        )
+
     exclude_names = body.get("exclude")
     if exclude_names is not None and not isinstance(exclude_names, list):
         return None, None, (jsonify({"error": "'exclude' must be a list of scheme names."}), 400)
 
-    return user_query.strip(), exclude_names, None
+    return user_query, exclude_names, None
 
 
 @api_bp.route("/")
