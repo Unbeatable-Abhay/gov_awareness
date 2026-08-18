@@ -192,3 +192,28 @@ def save_scheme(scheme: dict):
         client.table("schemes").upsert(record, on_conflict="scheme_name").execute()
     except Exception as exc:  # noqa: BLE001
         logger.warning("Failed to save scheme '%s' to cache: %s", scheme.get("scheme_name"), exc)
+
+
+def has_user_consent(user_id: str) -> bool:
+    """Checks whether a user has a recorded consent row (T&C + analytics,
+    both mandatory, written together at signup). Used to gate access to
+    scheme_details/legal_advisory beyond just being logged in — a user
+    must have actually accepted terms, not just have a valid session."""
+    client = get_supabase_client()
+    if client is None:
+        # Fail closed: if we can't check, don't assume consent exists.
+        return False
+
+    try:
+        result = (
+            client.table("user_consents")
+            .select("user_id")
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Consent check failed for user %s: %s", user_id, exc)
+        return False
+
+    return bool(result.data)

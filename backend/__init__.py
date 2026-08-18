@@ -2,13 +2,18 @@ import logging
 
 from flask import Flask
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from .config import Config
 from .errors import register_error_handlers
 from .logging_config import setup_logging
-from .routes import api_bp
 
 logger = logging.getLogger(__name__)
+
+limiter = Limiter(key_func=get_remote_address)
+
+from .routes import api_bp  # noqa: E402 - must be imported after `limiter` is defined, since routes.py imports it
 
 
 def create_app() -> Flask:
@@ -23,6 +28,8 @@ def create_app() -> Flask:
             "Set ALLOWED_ORIGINS to your frontend's domain(s) before deploying to production."
         )
     CORS(app, origins=Config.ALLOWED_ORIGINS)
+
+    limiter.init_app(app)
 
     app.register_blueprint(api_bp)
     register_error_handlers(app)

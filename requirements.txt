@@ -11,3 +11,4 @@ groq==0.37.1
 gunicorn==26.0.0
 supabase==2.10.0
 mistralai==1.5.1
+Flask-Limiter==3.9.2
