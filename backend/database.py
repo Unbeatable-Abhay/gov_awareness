@@ -217,3 +217,33 @@ def has_user_consent(user_id: str) -> bool:
         return False
 
     return bool(result.data)
+
+def get_random_schemes(limit: int = 10):
+    """Fetches a random sample of cached schemes, light fields only.
+
+    Used by the free, ungated Home screen — pure DB read, no embeddings,
+    no LLM call, no auth. Only returns schemes within the freshness
+    window, same as everywhere else."""
+    client = get_supabase_client()
+    if client is None:
+        return []
+
+    try:
+        result = client.rpc("random_schemes", {"result_limit": limit}).execute()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Random schemes fetch failed: %s", exc)
+        return []
+
+    rows = result.data or []
+    freshness_cutoff = datetime.now(timezone.utc) - timedelta(days=FRESHNESS_DAYS)
+
+    fresh = []
+    for row in rows:
+        updated_at = row.get("updated_at")
+        if not updated_at:
+            continue
+        updated_dt = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+        if updated_dt >= freshness_cutoff:
+            fresh.append(to_light_fields(row))
+
+    return fresh

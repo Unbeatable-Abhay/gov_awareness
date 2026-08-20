@@ -108,3 +108,29 @@ def legal_advisory():
 
     data, status = handle_request("legal", user_query)
     return jsonify(data), status
+
+@api_bp.route("/home_schemes", methods=["GET"])
+def home_schemes():
+    """Free, public, cache-only — random sample for the Home screen."""
+    from .database import get_random_schemes
+    schemes = get_random_schemes(limit=10)
+    return jsonify({"schemes": schemes}), 200
+
+
+@api_bp.route("/home_scheme_details", methods=["POST"])
+def home_scheme_details():
+    """Free, public, cache-only — full detail for a Home-listed scheme.
+    Deliberately does NOT fall back to the live agent: Home must stay free
+    of LLM cost, so a cache miss here is a genuine dead end, not a trigger
+    for generation."""
+    from .database import get_cached_scheme_by_name
+
+    user_query, _exclude_names, error_response = _get_query_or_error()
+    if error_response:
+        return error_response
+
+    scheme = get_cached_scheme_by_name(user_query)
+    if scheme is None:
+        return jsonify({"error": "This scheme is no longer available. Please check the Schemes tab instead."}), 404
+
+    return jsonify(scheme), 200
