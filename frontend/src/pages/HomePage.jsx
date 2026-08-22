@@ -1,14 +1,37 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { User } from "@phosphor-icons/react";
+import { useNavigate, Link } from "react-router-dom";
+import { User, WarningCircle, Tray } from "@phosphor-icons/react";
 import { getHomeSchemes } from "../api/schemes";
+import { useAuth } from "../auth/AuthContext";
 import SchemeCard from "../components/SchemeCard";
 import BottomNav from "../components/BottomNav";
+
+function SkeletonFeed() {
+  return (
+    <div className="scheme-feed">
+      <div className="skeleton skeleton--featured" />
+      <div className="scheme-grid">
+        <div className="skeleton skeleton--grid" />
+        <div className="skeleton skeleton--grid" />
+        <div className="skeleton skeleton--grid" />
+        <div className="skeleton skeleton--grid" />
+      </div>
+    </div>
+  );
+}
 
 function HomePage() {
   const [schemes, setSchemes] = useState([]);
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const initial = (
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email ||
+    "?"
+  ).trim()[0].toUpperCase();
 
   useEffect(() => {
     getHomeSchemes()
@@ -32,9 +55,13 @@ function HomePage() {
             Discover government schemes you qualify for and understand your legal rights — clearly, in one place.
           </p>
         </div>
-        <button className="home-header__profile" aria-label="Profile">
-          <User size={16} color="var(--color-text-muted)" />
-        </button>
+        <Link to="/profile" className="home-header__profile" aria-label="Profile">
+          {user ? (
+            <span className="home-header__initial">{initial}</span>
+          ) : (
+            <User size={16} color="var(--color-text-muted)" />
+          )}
+        </Link>
       </header>
 
       <div className="page__content">
@@ -43,23 +70,44 @@ function HomePage() {
           <span className="section-label__hint">Refreshes often</span>
         </div>
 
-        {status === "loading" && <p className="state-message">Loading schemes...</p>}
-        {status === "error" && <p className="state-message">Couldn't load schemes right now. Please try again.</p>}
-        {status === "ready" && schemes.length === 0 && (
-          <p className="state-message">No schemes available right now. Please check back soon.</p>
-        )}
+        <div className="scroll-area">
+          {status === "loading" && <SkeletonFeed />}
 
-        {status === "ready" && (
-          <div className="scheme-list">
-            {schemes.map((scheme) => (
+          {status === "error" && (
+            <div className="message-card">
+              <WarningCircle size={22} color="var(--color-seal)" />
+              <p>Couldn't load schemes right now. Please try again.</p>
+            </div>
+          )}
+
+          {status === "ready" && schemes.length === 0 && (
+            <div className="message-card">
+              <Tray size={22} color="var(--color-text-muted)" />
+              <p>No schemes available right now. Please check back soon.</p>
+            </div>
+          )}
+
+          {status === "ready" && schemes.length > 0 && (
+            <div className="scheme-feed">
               <SchemeCard
-                key={scheme.scheme_name}
-                scheme={scheme}
-                onClick={() => openScheme(scheme.scheme_name)}
+                scheme={schemes[0]}
+                onClick={() => openScheme(schemes[0].scheme_name)}
+                featured
               />
-            ))}
-          </div>
-        )}
+              <div className="scheme-grid">
+                {schemes.slice(1).map((scheme) => (
+                  <SchemeCard
+                    key={scheme.scheme_name}
+                    scheme={scheme}
+                    onClick={() => openScheme(scheme.scheme_name)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {status === "ready" && schemes.length > 0 && <div className="scroll-fade" />}
+        </div>
       </div>
 
       <BottomNav />
