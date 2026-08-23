@@ -8,4 +8,12 @@ function getHomeSchemeDetails(schemeName) {
   return apiPost("/home_scheme_details", { query: schemeName });
 }
 
-export { getHomeSchemes, getHomeSchemeDetails };
+function matchSchemes(query, excludeNames = []) {
+  return apiPost("/scheme_match", { query, exclude: excludeNames });
+}
+
+function getSchemeDetails(schemeName, accessToken) {
+  return apiPost("/scheme_details", { query: schemeName }, accessToken);
+}
+
+export { getHomeSchemes, getHomeSchemeDetails, matchSchemes, getSchemeDetails };

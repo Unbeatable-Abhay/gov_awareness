@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { GoogleLogo, SignOut } from "@phosphor-icons/react";
 import { useAuth } from "../auth/AuthContext";
 import BackHeader from "../components/BackHeader";
-import { useNavigate } from "react-router-dom";
 
 function getInitial(user) {
   const name = user?.user_metadata?.full_name || user?.user_metadata?.name;
@@ -16,6 +16,22 @@ function ProfilePage() {
   const [analyticsChecked, setAnalyticsChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (window.location.hash.includes("access_token")) {
+      navigate("/profile", { replace: true });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!loading && user && hasConsent) {
+      const returnTo = localStorage.getItem("sarkarly_return_to");
+      if (returnTo && returnTo !== "/profile") {
+        localStorage.removeItem("sarkarly_return_to");
+        navigate(returnTo, { replace: true });
+      }
+    }
+  }, [loading, user, hasConsent, navigate]);
 
   async function handleConsentSubmit() {
     setSubmitting(true);

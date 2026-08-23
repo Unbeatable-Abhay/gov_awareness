@@ -1,17 +1,20 @@
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import ComingSoonPage from "./pages/ComingSoonPage";
 import HomeSchemeDetailPage from "./pages/HomeSchemeDetailPage";
+import SchemesPage from "./pages/SchemesPage";
+import SchemeDetailPage from "./pages/SchemeDetailPage";
 import ProfilePage from "./pages/ProfilePage";
+import ComingSoonPage from "./pages/ComingSoonPage";
+import LegalPage from "./pages/LegalPage";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/schemes" element={<ComingSoonPage title="Schemes" />} />
-      <Route path="/legal" element={<ComingSoonPage title="Legal Advisory" />} />
-      <Route path="/directory" element={<ComingSoonPage title="Directory" />} />
-        <Route path="/home/scheme/:schemeName" element={<HomeSchemeDetailPage />} />
+      <Route path="/home/scheme/:schemeName" element={<HomeSchemeDetailPage />} />
+      <Route path="/schemes" element={<SchemesPage />} />
+      <Route path="/schemes/scheme/:schemeName" element={<SchemeDetailPage />} />
+<Route path="/legal" element={<LegalPage />} />      <Route path="/directory" element={<ComingSoonPage title="Directory" />} />
       <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );

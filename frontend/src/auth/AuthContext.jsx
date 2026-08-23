@@ -36,7 +36,8 @@ function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe();
   }, [checkConsent]);
 
-  function signInWithGoogle() {
+    function signInWithGoogle() {
+    localStorage.setItem("sarkarly_return_to", window.location.pathname);
     supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/profile` },

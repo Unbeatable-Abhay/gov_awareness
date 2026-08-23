@@ -21,14 +21,14 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.config["RATELIMIT_HEADERS_ENABLED"] = True
 
     if Config.ALLOWED_ORIGINS == "*":
         logger.warning(
             "ALLOWED_ORIGINS is not set — CORS is wide open ('*'). "
             "Set ALLOWED_ORIGINS to your frontend's domain(s) before deploying to production."
         )
-    CORS(app, origins=Config.ALLOWED_ORIGINS)
-
+    CORS(app, origins=Config.ALLOWED_ORIGINS, expose_headers=["Retry-After"])
     limiter.init_app(app)
 
     app.register_blueprint(api_bp)

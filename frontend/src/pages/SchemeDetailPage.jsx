@@ -1,32 +1,46 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getHomeSchemeDetails } from "../api/schemes";
+import { useParams, useNavigate } from "react-router-dom";
+import { getSchemeDetails } from "../api/schemes";
+import { useAuth } from "../auth/AuthContext";
 import { formatBoldText } from "../utils/formatText";
+import RetryCountdown from "../components/RetryCountdown";
 import BackHeader from "../components/BackHeader";
 
-function HomeSchemeDetailPage() {
+function SchemeDetailPage() {
   const { schemeName } = useParams();
   const decodedName = decodeURIComponent(schemeName);
   const [scheme, setScheme] = useState(null);
   const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState("");
+  const [retrySeconds, setRetrySeconds] = useState(null);
+  const { session, user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate("/schemes", { replace: true });
+      return;
+    }
     setStatus("loading");
-    getHomeSchemeDetails(decodedName)
+    setRetrySeconds(null);
+    getSchemeDetails(decodedName, session.access_token)
       .then((data) => {
         setScheme(data);
         setStatus("ready");
       })
       .catch((err) => {
-        if (err.status === 404) {
-          setErrorMessage("This scheme is no longer available. Please check the Schemes tab instead.");
+        if (err.status === 429) {
+          setErrorMessage("You've reached the limit for viewing scheme details this hour.");
+          setRetrySeconds(err.retryAfterSeconds || null);
+        } else if (err.status === 401 || err.status === 403) {
+          setErrorMessage("Please sign in again to view this scheme.");
         } else {
           setErrorMessage("Couldn't load this scheme right now. Please try again.");
         }
         setStatus("error");
       });
-  }, [decodedName]);
+  }, [decodedName, authLoading, user, session, navigate]);
 
   return (
     <div className="page">
@@ -49,6 +63,7 @@ function HomeSchemeDetailPage() {
         {status === "error" && (
           <div className="message-card">
             <p>{errorMessage}</p>
+            {retrySeconds !== null && <RetryCountdown seconds={retrySeconds} />}
           </div>
         )}
 
@@ -144,4 +159,4 @@ function HomeSchemeDetailPage() {
   );
 }
 
-export default HomeSchemeDetailPage;
+export default SchemeDetailPage;

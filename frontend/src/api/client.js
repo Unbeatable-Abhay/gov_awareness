@@ -1,9 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-async function apiPost(path, body) {
+async function apiPost(path, body, token) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const response = await fetch(`${API_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body ?? {}),
   });
 
@@ -12,6 +15,8 @@ async function apiPost(path, body) {
   if (!response.ok) {
     const error = new Error(data.error || "Something went wrong. Please try again.");
     error.status = response.status;
+    const retryAfter = response.headers.get("Retry-After");
+    if (retryAfter) error.retryAfterSeconds = parseInt(retryAfter, 10);
     throw error;
   }
 
@@ -25,6 +30,8 @@ async function apiGet(path) {
   if (!response.ok) {
     const error = new Error(data.error || "Something went wrong. Please try again.");
     error.status = response.status;
+    const retryAfter = response.headers.get("Retry-After");
+    if (retryAfter) error.retryAfterSeconds = parseInt(retryAfter, 10);
     throw error;
   }
 

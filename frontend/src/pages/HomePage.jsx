@@ -92,7 +92,7 @@ function HomePage() {
               <SchemeCard
                 scheme={schemes[0]}
                 onClick={() => openScheme(schemes[0].scheme_name)}
-                featured
+                variant="featured"
               />
               <div className="scheme-grid">
                 {schemes.slice(1).map((scheme) => (
@@ -100,6 +100,7 @@ function HomePage() {
                     key={scheme.scheme_name}
                     scheme={scheme}
                     onClick={() => openScheme(scheme.scheme_name)}
+                    variant="compact"
                   />
                 ))}
               </div>
