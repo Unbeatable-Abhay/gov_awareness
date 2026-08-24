@@ -9,6 +9,7 @@ langchain-tavily==0.2.18
 langchain-groq==1.1.2
 groq==0.37.1
 gunicorn==26.0.0
-supabase==2.10.0
+supabase==2.31.0
 mistralai==1.5.1
 Flask-Limiter==3.9.2
+langchain-google-genai==4.2.4

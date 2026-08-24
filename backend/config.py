@@ -32,9 +32,10 @@ class Config:
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     SUPABASE_URL = os.getenv("SUPABASE_URL")
     SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
     @classmethod
     def has_any_llm_key(cls) -> bool:
-        return bool(cls.GROQ_API_KEY or cls.MISTRAL_API_KEY)
+        return bool(cls.MISTRAL_API_KEY or cls.GEMINI_API_KEY)
