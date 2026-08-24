@@ -29,13 +29,13 @@ Browse all available central and state government schemes in one place. Select a
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React |
-| Backend | Flask (Python) |
-| AI Agent | LangChain |
-| Web Search | Tavily API |
-| Language Model | LLaMA 3.3 70B via Groq (primary) with Mistral Large fallback |
+| Layer | Technology                                      |
+|---|-------------------------------------------------|
+| Frontend | React                                           |
+| Backend | Flask (Python)                                  |
+| AI Agent | LangChain                                       |
+| Web Search | Tavily API                                      |
+| Language Model | Mistral Large with Gemini 3.5 flash as fallback |
 ---
 
 ## Project Structure
@@ -50,7 +50,7 @@ sarkarly/
 │   ├── logging_config.py    # Structured logging setup
 │   ├── routes.py            # Flask blueprint: /scheme_match, /legal_advisory, /scheme_directory
 │   ├── agents.py            # Agent construction + the multi-model fallback request handler
-│   ├── llm_providers.py     # Builds the Groq -> Mistral fallback chain
+│   ├── llm_providers.py     # Builds the Mistral -> Gemini fallback chain
 │   ├── search_tools.py      # Tavily web search tool wrapper
 │   ├── schemas.py           # Pydantic response schemas (structured LLM output)
 │   ├── prompts.py           # System prompts for each agent
@@ -79,12 +79,12 @@ pip install -r requirements.txt
 
 Copy `.env.example` to `.env` and fill in your API keys (see it for the full list, including server/CORS settings):
 ```
-GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
 Mistral_API_KEY=your_mistral_api_key
 TAVILY_API_KEY=your_tavily_api_key
 ```
 
-- Get Groq API key: https://console.groq.com
+- Get Gemini API key: https://aistudio.google.com
 - Get Mistral API key: https://console.mistral.ai
 - Get Tavily API key: https://app.tavily.com
 
@@ -123,7 +123,7 @@ npm start
 
 ## LLM Fallback
 
-The app uses **Groq** as the primary LLM provider. If Groq's daily token limit is reached, requests automatically fall back to **Mistral Large**. This ensures the app stays available even when one provider's free tier is exhausted.
+The app uses **Mistral** as the primary LLM provider. If Mistral's daily token limit is reached, requests automatically fall back to **Gemini 3.5 flash**. This ensures the app stays available even when one provider's free tier is exhausted.
 
 ---
 
