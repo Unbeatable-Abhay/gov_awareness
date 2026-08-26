@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getSchemeDetails } from "../api/schemes";
 import { useAuth } from "../auth/AuthContext";
@@ -13,34 +13,58 @@ function SchemeDetailPage() {
   const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const [retrySeconds, setRetrySeconds] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   const { session, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  // Tracks the request "in flight" so a slow/stale response from an
+  // earlier fetch (e.g. from StrictMode's dev double-invoke, or a rapid
+  // repeat effect fire) can't overwrite state set by a newer one.
+  const requestIdRef = useRef(0);
+
+  const fetchDetails = useCallback(() => {
     if (authLoading) return;
     if (!user) {
       navigate("/schemes", { replace: true });
       return;
     }
+
+    const thisRequestId = ++requestIdRef.current;
+
     setStatus("loading");
+    setErrorMessage("");
     setRetrySeconds(null);
+
     getSchemeDetails(decodedName, session.access_token)
       .then((data) => {
+        if (requestIdRef.current !== thisRequestId) return; // stale response, ignore
         setScheme(data);
         setStatus("ready");
       })
       .catch((err) => {
+        if (requestIdRef.current !== thisRequestId) return; // stale response, ignore
         if (err.status === 429) {
-          setErrorMessage("You've reached the limit for viewing scheme details this hour.");
+          setErrorMessage("You've reached the limit for viewing scheme details right now.");
           setRetrySeconds(err.retryAfterSeconds || null);
         } else if (err.status === 401 || err.status === 403) {
           setErrorMessage("Please sign in again to view this scheme.");
+        } else if (err.status === 503) {
+          setErrorMessage("Our AI models are currently busy. Please try again in a moment.");
         } else {
           setErrorMessage("Couldn't load this scheme right now. Please try again.");
         }
         setStatus("error");
       });
-  }, [decodedName, authLoading, user, session, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decodedName, authLoading, user?.id, session?.access_token, navigate]);
+
+  useEffect(() => {
+    fetchDetails();
+  }, [fetchDetails, retryCount]);
+
+  function handleRetry() {
+    setRetryCount((c) => c + 1);
+  }
 
   return (
     <div className="page">
@@ -64,6 +88,14 @@ function SchemeDetailPage() {
           <div className="message-card">
             <p>{errorMessage}</p>
             {retrySeconds !== null && <RetryCountdown seconds={retrySeconds} />}
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleRetry}
+              style={{ marginTop: "12px" }}
+            >
+              Try again
+            </button>
           </div>
         )}
 

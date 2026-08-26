@@ -5,6 +5,7 @@ from flask import Blueprint, g, jsonify, request
 from . import limiter
 from .agents import handle_request
 from .auth import require_auth
+from .config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ def home():
 
 
 @api_bp.route("/scheme_match", methods=["POST"])
-@limiter.limit("30 per hour")
+@limiter.limit(lambda: Config.SCHEME_MATCH_DAILY_LIMIT)
 def scheme_match():
     """Free, public — light list, no login required."""
     user_query, exclude_names, error_response = _get_query_or_error()
@@ -73,7 +74,7 @@ def scheme_match():
 
 
 @api_bp.route("/scheme_directory", methods=["POST"])
-@limiter.limit("30 per hour")
+@limiter.limit(lambda: Config.SCHEME_DIRECTORY_DAILY_LIMIT)
 def scheme_directory():
     """Free, public — light list, no login required."""
     user_query, exclude_names, error_response = _get_query_or_error()
@@ -86,7 +87,7 @@ def scheme_directory():
 
 @api_bp.route("/scheme_details", methods=["POST"])
 @require_auth
-@limiter.limit("20 per hour", key_func=_user_id_key)
+@limiter.limit(lambda: Config.SCHEME_DETAILS_DAILY_LIMIT, key_func=_user_id_key)
 def scheme_details():
     """Gated — full scheme detail, requires login."""
     user_query, _exclude_names, error_response = _get_query_or_error()
@@ -99,7 +100,7 @@ def scheme_details():
 
 @api_bp.route("/legal_advisory", methods=["POST"])
 @require_auth
-@limiter.limit("15 per hour", key_func=_user_id_key)
+@limiter.limit(lambda: Config.LEGAL_ADVISORY_DAILY_LIMIT, key_func=_user_id_key)
 def legal_advisory():
     """Gated — legal analysis, requires login."""
     user_query, _exclude_names, error_response = _get_query_or_error()

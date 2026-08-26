@@ -29,13 +29,13 @@ Browse all available central and state government schemes in one place. Select a
 
 ## Tech Stack
 
-| Layer | Technology                                      |
-|---|-------------------------------------------------|
-| Frontend | React                                           |
-| Backend | Flask (Python)                                  |
-| AI Agent | LangChain                                       |
-| Web Search | Tavily API                                      |
-| Language Model | Mistral Large with Gemini 3.5 flash as fallback |
+| Layer | Technology                                                        |
+|---|-------------------------------------------------------------------|
+| Frontend | React                                                             |
+| Backend | Flask (Python)                                                    |
+| AI Agent | LangChain                                                         |
+| Web Search | Tavily API                                                        |
+| Language Model | Mistral Large with Mistral Small and Gemini 3.5 flash as fallback |
 ---
 
 ## Project Structure
@@ -50,7 +50,7 @@ sarkarly/
 │   ├── logging_config.py    # Structured logging setup
 │   ├── routes.py            # Flask blueprint: /scheme_match, /legal_advisory, /scheme_directory
 │   ├── agents.py            # Agent construction + the multi-model fallback request handler
-│   ├── llm_providers.py     # Builds the Mistral -> Gemini fallback chain
+│   ├── llm_providers.py     # Builds the Mistral -> Mistral/Gemini fallback chain
 │   ├── search_tools.py      # Tavily web search tool wrapper
 │   ├── schemas.py           # Pydantic response schemas (structured LLM output)
 │   ├── prompts.py           # System prompts for each agent
@@ -123,7 +123,7 @@ npm start
 
 ## LLM Fallback
 
-The app uses **Mistral** as the primary LLM provider. If Mistral's daily token limit is reached, requests automatically fall back to **Gemini 3.5 flash**. This ensures the app stays available even when one provider's free tier is exhausted.
+The app uses **Mistral large** as the primary LLM provider. If Mistral's daily token limit is reached, requests automatically fall back to  either **Gemini 3.5 flash** or **Mistral small**. This ensures the app stays available even when one provider's free tier is exhausted.
 
 ---
 

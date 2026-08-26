@@ -4,7 +4,6 @@ from .database import (
     get_cached_scheme_by_name,
     save_scheme,
     search_cached_schemes,
-    search_cached_schemes_light,
 )
 from .llm_providers import get_llms
 from .prompts import (
@@ -166,17 +165,7 @@ def handle_request(agent_type: str, user_query: str, exclude_names: list = None)
     exclude_names = exclude_names or []
 
     if agent_type == "list":
-        cached = search_cached_schemes_light(user_query, exclude_names=exclude_names)
-        if cached:
-            logger.info("Serving %d scheme(s) from cache (light) for query: %r", len(cached), user_query)
-            return {
-                "schemes": cached,
-                "disclaimer": "This information is for awareness purposes only. Please verify through official government portals before applying.",
-            }, 200
-
         data, status = _run_live_agent("list", user_query, exclude_names=exclude_names)
-        # Deliberately NOT saved to cache — light results are incomplete
-        # records; only full-detail generations get cached (see save_scheme).
         return data, status
 
     if agent_type == "details":

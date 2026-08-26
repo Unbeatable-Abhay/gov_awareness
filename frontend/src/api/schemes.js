@@ -16,4 +16,8 @@ function getSchemeDetails(schemeName, accessToken) {
   return apiPost("/scheme_details", { query: schemeName }, accessToken);
 }
 
-export { getHomeSchemes, getHomeSchemeDetails, matchSchemes, getSchemeDetails };
+function searchDirectory(query, excludeNames = []) {
+  return apiPost("/scheme_directory", { query, exclude: excludeNames });
+}
+
+export { getHomeSchemes, getHomeSchemeDetails, matchSchemes, getSchemeDetails, searchDirectory };

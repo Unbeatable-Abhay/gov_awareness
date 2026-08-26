@@ -50,13 +50,13 @@ function SchemesPage() {
       setStatus("ready");
     } catch (err) {
       if (err.status === 429) {
-          setErrorMessage("You've reached the limit for viewing scheme details this hour.");
+          setSearchErrorMessage("You've reached the limit for viewing scheme details this hour.");
           setRetrySeconds(err.retryAfterSeconds || null);
         } else if (err.status === 401 || err.status === 403) {
-          setErrorMessage("Please sign in again to view this scheme.");
+          setSearchErrorMessage("Please sign in again to view this scheme.");
           setRetrySeconds(null);
         } else {
-          setErrorMessage("Couldn't load this scheme right now. Please try again.");
+          setSearchErrorMessage("Couldn't load this scheme right now. Please try again.");
           setRetrySeconds(null);
         }
         setStatus("error");
@@ -164,7 +164,7 @@ function SchemesPage() {
 
         {status === "error" && (
           <div className="message-card">
-            <p>{errorMessage}</p>
+            <p>{searchErrorMessage}</p>
             {retrySeconds !== null && <RetryCountdown seconds={retrySeconds} />}
           </div>
         )}

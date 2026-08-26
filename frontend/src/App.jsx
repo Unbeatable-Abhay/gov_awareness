@@ -4,7 +4,7 @@ import HomeSchemeDetailPage from "./pages/HomeSchemeDetailPage";
 import SchemesPage from "./pages/SchemesPage";
 import SchemeDetailPage from "./pages/SchemeDetailPage";
 import ProfilePage from "./pages/ProfilePage";
-import ComingSoonPage from "./pages/ComingSoonPage";
+import DirectoryPage from "./pages/DirectoryPage";
 import LegalPage from "./pages/LegalPage";
 
 function App() {
@@ -14,7 +14,8 @@ function App() {
       <Route path="/home/scheme/:schemeName" element={<HomeSchemeDetailPage />} />
       <Route path="/schemes" element={<SchemesPage />} />
       <Route path="/schemes/scheme/:schemeName" element={<SchemeDetailPage />} />
-<Route path="/legal" element={<LegalPage />} />      <Route path="/directory" element={<ComingSoonPage title="Directory" />} />
+        <Route path="/legal" element={<LegalPage />} />
+        <Route path="/directory" element={<DirectoryPage />} />
       <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );

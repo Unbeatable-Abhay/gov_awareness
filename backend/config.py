@@ -28,13 +28,27 @@ class Config:
     # --- Logging ---
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
-    # --- API keys (existence is checked, values are read lazily where used) ---
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     SUPABASE_URL = os.getenv("SUPABASE_URL")
     SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+
+    GEMINI_RPM = int(os.getenv("GEMINI_RPM", "5"))
+    GEMINI_RPD = int(os.getenv("GEMINI_RPD", "18"))
+    MISTRAL_RPM = int(os.getenv("MISTRAL_RPM", "0"))
+    MISTRAL_RPD = int(os.getenv("MISTRAL_RPD", "0"))
+    MISTRAL_SMALL_RPM = int(os.getenv("MISTRAL_SMALL_RPM", "0"))
+    MISTRAL_SMALL_RPD = int(os.getenv("MISTRAL_SMALL_RPD", "0"))
+
+    # --- Per-user / per-IP daily request limits (Flask-Limiter) ---
+    # Strings in Flask-Limiter's own format, e.g. "80 per day".
+    SCHEME_MATCH_DAILY_LIMIT = os.getenv("SCHEME_MATCH_DAILY_LIMIT", "50 per day")
+    SCHEME_DIRECTORY_DAILY_LIMIT = os.getenv("SCHEME_DIRECTORY_DAILY_LIMIT", "50 per day")
+    SCHEME_DETAILS_DAILY_LIMIT = os.getenv("SCHEME_DETAILS_DAILY_LIMIT", "20 per day")
+    LEGAL_ADVISORY_DAILY_LIMIT = os.getenv("LEGAL_ADVISORY_DAILY_LIMIT", "20 per day")
 
     @classmethod
     def has_any_llm_key(cls) -> bool:
