@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { formatBoldText } from "../utils/formatText";
 import RetryCountdown from "../components/RetryCountdown";
 import BackHeader from "../components/BackHeader";
+import SearchingIndicator from "../components/SearchingIndicator";
 
 function SchemeDetailPage() {
   const { schemeName } = useParams();
@@ -21,6 +22,7 @@ function SchemeDetailPage() {
   // earlier fetch (e.g. from StrictMode's dev double-invoke, or a rapid
   // repeat effect fire) can't overwrite state set by a newer one.
   const requestIdRef = useRef(0);
+  const searchStartedAtRef = useRef(null);
 
   const fetchDetails = useCallback(() => {
     if (authLoading) return;
@@ -30,6 +32,7 @@ function SchemeDetailPage() {
     }
 
     const thisRequestId = ++requestIdRef.current;
+    searchStartedAtRef.current = Date.now();
 
     setStatus("loading");
     setErrorMessage("");
@@ -81,6 +84,7 @@ function SchemeDetailPage() {
             <div className="skeleton skeleton--line" style={{ width: "70%" }} />
             <div className="skeleton skeleton--line" style={{ marginTop: "18px" }} />
             <div className="skeleton skeleton--line" style={{ width: "85%" }} />
+            <SearchingIndicator startedAt={searchStartedAtRef.current} />
           </div>
         )}
 

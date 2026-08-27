@@ -8,9 +8,15 @@ import AuthGateModal from "../components/AuthGateModal";
 import BottomNav from "../components/BottomNav";
 import SelectDropdown from "../components/SelectDropdown";
 import RetryCountdown from "../components/RetryCountdown";
+import SearchingIndicator from "../components/SearchingIndicator";
 
 function SchemesPage() {
-  const { query, setQuery, schemes, setSchemes, status, setStatus } = useSchemesSearch();
+  const {
+    query, setQuery,
+    schemes, setSchemes,
+    status, setStatus,
+    searchStartedAt, setSearchStartedAt,
+  } = useSchemesSearch();
   const [showGate, setShowGate] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [ageRange, setAgeRange] = useState("");
@@ -19,8 +25,8 @@ function SchemesPage() {
   const [gender, setGender] = useState("");
   const navigate = useNavigate();
   const { user, hasConsent } = useAuth();
-    const [searchErrorMessage, setSearchErrorMessage] = useState("");
-    const [retrySeconds, setRetrySeconds] = useState(null);
+  const [searchErrorMessage, setSearchErrorMessage] = useState("");
+  const [retrySeconds, setRetrySeconds] = useState(null);
 
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -43,23 +49,24 @@ function SchemesPage() {
       ? `${query.trim()} (${extras.join(", ")})`
       : query.trim();
 
-        setStatus("loading");
+    setStatus("loading");
+    setSearchStartedAt(Date.now());
     try {
       const data = await matchSchemes(fullQuery);
       setSchemes(data.schemes || []);
       setStatus("ready");
     } catch (err) {
       if (err.status === 429) {
-          setSearchErrorMessage("You've reached the limit for viewing scheme details this hour.");
-          setRetrySeconds(err.retryAfterSeconds || null);
-        } else if (err.status === 401 || err.status === 403) {
-          setSearchErrorMessage("Please sign in again to view this scheme.");
-          setRetrySeconds(null);
-        } else {
-          setSearchErrorMessage("Couldn't load this scheme right now. Please try again.");
-          setRetrySeconds(null);
-        }
-        setStatus("error");
+        setSearchErrorMessage("You've reached the limit for viewing scheme details this hour.");
+        setRetrySeconds(err.retryAfterSeconds || null);
+      } else if (err.status === 401 || err.status === 403) {
+        setSearchErrorMessage("Please sign in again to view this scheme.");
+        setRetrySeconds(null);
+      } else {
+        setSearchErrorMessage("Couldn't load this scheme right now. Please try again.");
+        setRetrySeconds(null);
+      }
+      setStatus("error");
     }
   }
 
@@ -109,7 +116,7 @@ function SchemesPage() {
 
           {showDetails && (
             <div className="details-fields">
-                            <SelectDropdown
+              <SelectDropdown
                 placeholder="Age range"
                 value={ageRange}
                 onChange={setAgeRange}
@@ -161,6 +168,8 @@ function SchemesPage() {
             {status === "loading" ? "Searching..." : "Find schemes"}
           </button>
         </form>
+
+        {status === "loading" && <SearchingIndicator startedAt={searchStartedAt} />}
 
         {status === "error" && (
           <div className="message-card">

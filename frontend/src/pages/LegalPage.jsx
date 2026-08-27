@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { getLegalAdvisory } from "../api/legal";
 import { useAuth } from "../auth/AuthContext";
+import { useLegalSearch } from "../context/LegalSearchContext";
 import { formatBoldText } from "../utils/formatText";
 import AuthGateModal from "../components/AuthGateModal";
 import RetryCountdown from "../components/RetryCountdown";
 import BottomNav from "../components/BottomNav";
+import SearchingIndicator from "../components/SearchingIndicator";
 
 function LegalPage() {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [result, setResult] = useState(null);
+  const {
+    query, setQuery,
+    status, setStatus,
+    result, setResult,
+    searchStartedAt, setSearchStartedAt,
+  } = useLegalSearch();
   const [errorMessage, setErrorMessage] = useState("");
   const [retrySeconds, setRetrySeconds] = useState(null);
   const [showGate, setShowGate] = useState(false);
@@ -32,6 +37,7 @@ function LegalPage() {
     }
 
     setStatus("loading");
+    setSearchStartedAt(Date.now());
     setRetrySeconds(null);
     try {
       const data = await getLegalAdvisory(query.trim(), session.access_token);
@@ -78,15 +84,7 @@ function LegalPage() {
               </button>
             </form>
 
-            {status === "loading" && (
-              <div className="detail-skeleton">
-                <div className="skeleton skeleton--title" />
-                <div className="skeleton skeleton--box" />
-                <div className="skeleton skeleton--line" />
-                <div className="skeleton skeleton--line" />
-                <div className="skeleton skeleton--line" style={{ width: "70%" }} />
-              </div>
-            )}
+            {status === "loading" && <SearchingIndicator startedAt={searchStartedAt} />}
 
             {status === "error" && (
               <div className="message-card">

@@ -20,8 +20,9 @@ function DirectorySearchProvider({ children }) {
   const [stateName, setStateName] = useState(persisted?.stateName ?? "All States");
   const [schemes, setSchemes] = useState(persisted?.schemes ?? []);
   const [hasSearched, setHasSearched] = useState(persisted?.hasSearched ?? false);
-  // Same reasoning as SchemesSearchContext — never resume mid-request.
   const [status, setStatus] = useState(persisted?.schemes?.length ? "ready" : "idle");
+  // Not persisted — see SchemesSearchContext for the reasoning.
+  const [searchStartedAt, setSearchStartedAt] = useState(null);
 
   useEffect(() => {
     try {
@@ -40,6 +41,7 @@ function DirectorySearchProvider({ children }) {
     schemes, setSchemes,
     status, setStatus,
     hasSearched, setHasSearched,
+    searchStartedAt, setSearchStartedAt,
   };
 
   return <DirectorySearchContext.Provider value={value}>{children}</DirectorySearchContext.Provider>;

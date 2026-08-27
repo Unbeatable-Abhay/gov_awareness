@@ -18,10 +18,9 @@ function LegalSearchProvider({ children }) {
 
   const [query, setQuery] = useState(persisted?.query ?? "");
   const [result, setResult] = useState(persisted?.result ?? null);
-  // Never resume mid-request or mid-error on a fresh load — same reasoning
-  // as SchemesSearchContext/DirectorySearchContext. If we have a real
-  // result, show it; otherwise start idle.
   const [status, setStatus] = useState(persisted?.result ? "ready" : "idle");
+  // Not persisted — see SchemesSearchContext for the reasoning.
+  const [searchStartedAt, setSearchStartedAt] = useState(null);
 
   useEffect(() => {
     try {
@@ -32,7 +31,12 @@ function LegalSearchProvider({ children }) {
     }
   }, [query, result]);
 
-  const value = { query, setQuery, result, setResult, status, setStatus };
+  const value = {
+    query, setQuery,
+    result, setResult,
+    status, setStatus,
+    searchStartedAt, setSearchStartedAt,
+  };
 
   return <LegalSearchContext.Provider value={value}>{children}</LegalSearchContext.Provider>;
 }

@@ -18,10 +18,12 @@ function SchemesSearchProvider({ children }) {
 
   const [query, setQuery] = useState(persisted?.query ?? "");
   const [schemes, setSchemes] = useState(persisted?.schemes ?? []);
-  // Deliberately NOT persisting status as "loading"/"loadingMore" — a fresh
-  // page load should never resume mid-request. If we had results, show them
-  // as "ready" immediately; otherwise start idle.
   const [status, setStatus] = useState(persisted?.schemes?.length ? "ready" : "idle");
+  // Not persisted to sessionStorage on purpose — this survives tab
+  // switches (Context stays mounted across client-side navigation), but a
+  // real page reload should abandon a dead in-flight request rather than
+  // showing a stale timer for work that no longer exists.
+  const [searchStartedAt, setSearchStartedAt] = useState(null);
 
   useEffect(() => {
     try {
@@ -32,7 +34,12 @@ function SchemesSearchProvider({ children }) {
     }
   }, [query, schemes]);
 
-  const value = { query, setQuery, schemes, setSchemes, status, setStatus };
+  const value = {
+    query, setQuery,
+    schemes, setSchemes,
+    status, setStatus,
+    searchStartedAt, setSearchStartedAt,
+  };
 
   return <SchemesSearchContext.Provider value={value}>{children}</SchemesSearchContext.Provider>;
 }

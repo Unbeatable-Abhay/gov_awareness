@@ -8,6 +8,7 @@ import AuthGateModal from "../components/AuthGateModal";
 import BottomNav from "../components/BottomNav";
 import SelectDropdown from "../components/SelectDropdown";
 import RetryCountdown from "../components/RetryCountdown";
+import SearchingIndicator from "../components/SearchingIndicator";
 
 const ALL_STATES = "All States";
 const ALL_PROFESSIONS = "All Professions";
@@ -86,6 +87,7 @@ function DirectoryPage() {
     schemes, setSchemes,
     status, setStatus,
     hasSearched, setHasSearched,
+    searchStartedAt, setSearchStartedAt,
   } = useDirectorySearch();
   const [showGate, setShowGate] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -98,6 +100,7 @@ function DirectoryPage() {
     const fullQuery = buildDirectoryQuery(profession, stateName);
 
     setStatus("loading");
+    setSearchStartedAt(Date.now());
     setHasSearched(true);
     try {
       const data = await searchDirectory(fullQuery);
@@ -174,6 +177,8 @@ function DirectoryPage() {
             {status === "loading" ? "Searching..." : "Browse schemes"}
           </button>
         </form>
+
+        {status === "loading" && <SearchingIndicator startedAt={searchStartedAt} />}
 
         {status === "error" && (
           <div className="message-card">

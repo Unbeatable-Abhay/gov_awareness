@@ -10,16 +10,16 @@ import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-      <BrowserRouter>
-          <AuthProvider>
-              <SchemesSearchProvider>
-              <DirectorySearchProvider>
-                  <LegalSearchProvider>
-                      <App />
-                  </LegalSearchProvider>
-              </DirectorySearchProvider>
-              </SchemesSearchProvider>
-          </AuthProvider>
-      </BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <SchemesSearchProvider>
+          <DirectorySearchProvider>
+            <LegalSearchProvider>
+              <App />
+            </LegalSearchProvider>
+          </DirectorySearchProvider>
+        </SchemesSearchProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>
 );

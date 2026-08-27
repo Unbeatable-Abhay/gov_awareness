@@ -181,18 +181,27 @@ def save_scheme(scheme: dict):
     as if they were complete."""
     client = get_supabase_client()
     if client is None:
+        logger.warning(
+            "Cannot save scheme '%s' to cache — Supabase not configured.",
+            scheme.get("scheme_name"),
+        )
         return
 
     embedding = get_embedding(_scheme_search_text(scheme))
     if embedding is None:
+        logger.warning(
+            "Failed to save scheme '%s' to cache — embedding generation "
+            "returned None (see prior warning for the underlying cause).",
+            scheme.get("scheme_name"),
+        )
         return
 
     try:
         record = {**scheme, "embedding": embedding, "updated_at": datetime.now(timezone.utc).isoformat()}
         client.table("schemes").upsert(record, on_conflict="scheme_name").execute()
+        logger.info("Saved scheme '%s' to cache.", scheme.get("scheme_name"))
     except Exception as exc:  # noqa: BLE001
         logger.warning("Failed to save scheme '%s' to cache: %s", scheme.get("scheme_name"), exc)
-
 
 def has_user_consent(user_id: str) -> bool:
     """Checks whether a user has a recorded consent row (T&C + analytics,
