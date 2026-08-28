@@ -22,7 +22,7 @@ function SchemeDetailPage() {
   // earlier fetch (e.g. from StrictMode's dev double-invoke, or a rapid
   // repeat effect fire) can't overwrite state set by a newer one.
   const requestIdRef = useRef(0);
-  const searchStartedAtRef = useRef(null);
+  const searchStartedAtRef = useRef(Date.now());
 
   const fetchDetails = useCallback(() => {
     if (authLoading) return;
@@ -32,7 +32,6 @@ function SchemeDetailPage() {
     }
 
     const thisRequestId = ++requestIdRef.current;
-    searchStartedAtRef.current = Date.now();
 
     setStatus("loading");
     setErrorMessage("");
@@ -66,6 +65,7 @@ function SchemeDetailPage() {
   }, [fetchDetails, retryCount]);
 
   function handleRetry() {
+    searchStartedAtRef.current = Date.now();
     setRetryCount((c) => c + 1);
   }
 
